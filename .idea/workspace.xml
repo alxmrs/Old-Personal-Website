@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="862ab7f0-544f-4ee7-86f8-ea19011b6bdf" name="Default" comment="Initial Commit (starter code from previous project).">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/error.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/css/style.css" afterPath="$PROJECT_DIR$/css/style.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/avoidPointer.js" afterPath="$PROJECT_DIR$/js/avoidPointer.js" />
     </list>
     <ignored path="alexrosengarten.com.iws" />
@@ -63,8 +60,8 @@
       <file leaf-file-name="avoidPointer.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/avoidPointer.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2595">
-              <caret line="173" column="43" selection-start-line="173" selection-start-column="43" selection-end-line="173" selection-end-column="43" />
+            <state relative-caret-position="351">
+              <caret line="261" column="5" selection-start-line="261" selection-start-column="5" selection-end-line="261" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -687,12 +684,12 @@
       <option name="presentableId" value="Default" />
       <updated>1467358245257</updated>
       <workItem from="1467358246572" duration="4857000" />
-      <workItem from="1467777471746" duration="6439000" />
+      <workItem from="1467777471746" duration="6490000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="11296000" />
+    <option name="totallyTimeSpent" value="11347000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="4" y="23" width="1436" height="877" extended-state="6" />
@@ -791,8 +788,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/avoidPointer.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2595">
-          <caret line="173" column="43" selection-start-line="173" selection-start-column="43" selection-end-line="173" selection-end-column="43" />
+        <state relative-caret-position="351">
+          <caret line="261" column="5" selection-start-line="261" selection-start-column="5" selection-end-line="261" selection-end-column="5" />
           <folding />
         </state>
       </provider>

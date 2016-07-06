@@ -3,6 +3,7 @@
     window.onload = main;
     window.onresize = handleResize;
     document.onmousemove = handleMouseMove;
+    document.ontouchmove = handleMouseMove; 
 
     var x = null;
     var y = null;
@@ -259,5 +260,4 @@
         }, 64);
 
     }
-
 })();
