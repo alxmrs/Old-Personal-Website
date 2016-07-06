@@ -1,6 +1,5 @@
 (function ()
 {
-
     window.onload = main;
     window.onresize = handleResize;
     document.onmousemove = handleMouseMove;
@@ -9,10 +8,9 @@
     var y = null;
     var M = 10000;
     var d = .5;
-    var blocks;
     var screenW;
     var screenH;
-    var svgId = 'svg1';
+    var svgId = 'svg';
 
 
     function handleMouseMove(event)
@@ -41,9 +39,6 @@
         x = event.pageX;
         y = event.pageY;
 
-        // if(blocks  !== undefined){
-        //     [].forEach.call(blocks, updateElemPos);
-        // }
     }
 
     function getMouseX()
@@ -59,11 +54,11 @@
     function getElemPos(elem)
     {
         // yay readability
-        // for (var lx = 0, ly = 0;
-        //      elem != null;
-        //      lx += elem.offsetLeft, ly += elem.offsetTop, elem = elem.offsetParent);
-        lx = elem.offsetLeft;
-        ly = elem.offsetTop;
+        for (var lx = 0, ly = 0;
+             elem != null;
+             lx += elem.offsetLeft, ly += elem.offsetTop, elem = elem.offsetParent);
+        // lx = elem.offsetLeft;
+        // ly = elem.offsetTop;
         return {x: lx, y: ly};
     }
 
@@ -80,7 +75,6 @@
         if (elem.style.top !== '') {
             y00 = y0 - parseInt(elem.style.top);
         }
-
 
         var x = getMouseX();
         var y = getMouseY();
@@ -117,12 +111,13 @@
 
     function getBrowserDimensions()
     {
-        var w = window.innerWidth
-            || document.documentElement.clientWidth
+        var w = document.documentElement.clientWidth
+            || window.innerWidth
             || document.body.clientWidth;
 
-        var h = window.innerHeight
-            || document.documentElement.clientHeight
+
+        var h = document.documentElement.clientHeight
+            || window.innerHeight
             || document.body.clientHeight;
 
         return {w: w, h: h};
@@ -146,8 +141,6 @@
             }
             top += rLen;
         }
-
-
     }
 
     function buildTable(tableId, w, h)
@@ -175,8 +168,10 @@
         var _class = className || 'svgBlock';
 
         var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        if(typeof idName !== 'undefined'){
+            rect.setAttribute('id', idName);
+        }
         rect.setAttribute('class', _class);
-        rect.setAttribute('id', idName);
         rect.setAttribute('x', _x);
         rect.setAttribute('y', _y);
         rect.setAttribute('x0', _x);
@@ -232,45 +227,37 @@
 
     function main()
     {
-        svgId = 'svg1';
+        svgId = 'svg';
+
+        var svgObj = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svgObj.setAttribute('id', svgId);
+        document.body.appendChild(svgObj);
+
 
         screenW = getBrowserDimensions().w;
         screenH = getBrowserDimensions().h;
 
-
-        var svg1 = document.getElementById(svgId);
         var titleText = document.getElementById('titleText');
 
-        svg1.setAttribute('width', screenW + 'px');
-        svg1.setAttribute('height', screenH + 'px');
-        // var rect1 = svg1.firstElementChild();
+        svgObj.setAttribute('width', screenW + 'px');
+        svgObj.setAttribute('height', screenH + 'px');
 
-        // console.log(rect1);
-
-        var lw = 30;
-        var lr = Math.ceil(titleText.offsetWidth / lw) + 2;
-        var lc = Math.ceil(titleText.offsetHeight / lw) + 2;
         var sw = 10;
-        var sr = Math.ceil(titleText.offsetWidth / sw) + 5;
-        var sc = Math.ceil(titleText.offsetHeight / sw) + 5;
+        var sr = Math.ceil(titleText.offsetWidth / sw) + 2;
+        var sc = Math.ceil(titleText.offsetHeight / sw) + 2;
 
-        buildSVG('svg1', (screenW - sw * sr) / 2, (screenH - sw * sc) / 2, sw, sr, sc, '#375a7f');
+        buildSVG(svgId, (screenW - sw * sr) / 2, (screenH - sw * sc) / 2, sw, sr, sc, '#375a7f');
 
-        // blocks = document.getElementsByClassName('block');
         var svgBlocks = document.getElementsByClassName('svgBlock');
 
         setInterval(function ()
         {
             [].forEach.call(svgBlocks, function (block)
             {
-                // console.log('elem_pos');
-                // console.log(getElemPos(block));
-                // updateElemPos(block, 10000, 1/2);
                 updateSVGPos(block, 10000);
             });
         }, 64);
 
     }
-
 
 })();
