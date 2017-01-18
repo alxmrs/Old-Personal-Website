@@ -3,19 +3,87 @@
     window.onload = main;
     window.onresize = handleResize;
     document.onmousemove = handleMouseMove;
-    document.ontouchmove = handleMouseMove; 
+    document.ontouchmove = handleMouseMove;
 
-    var x = null;
-    var y = null;
-    var M = 10000;
-    var d = .5;
-    var screenW;
-    var screenH;
-    var svgId = 'svg';
+    var mouseX;
+    var mouseY;
+    var svgId;
+    var screenSize;
 
-
-    function handleMouseMove(event)
+    /**
+     * Init + Update loop
+     */
+    function main()
     {
+
+        // Init
+        svgId = 'svg';
+
+        var svgObj = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svgObj.setAttribute('id', svgId);
+        document.body.appendChild(svgObj);
+
+
+        screenSize = _getBrowserDimensions();
+        var screenW = screenSize.w;
+        var screenH = screenSize.h;
+
+        var titleText = document.getElementById('titleText');
+
+        svgObj.setAttribute('width', screenW + 'px');
+        svgObj.setAttribute('height', screenH + 'px');
+
+        var squareWidth = 20;
+        var squareRow = Math.ceil(titleText.offsetWidth / squareWidth) + 2;
+        var squareCol = Math.ceil(titleText.offsetHeight / squareWidth) + 2;
+
+        _buildSVG(svgId, (screenW - squareWidth * squareRow) / 2,
+            (screenH - squareWidth * squareCol) / 2,
+            squareWidth, squareRow, squareCol, '#375a7f');
+
+        var svgBlocks = document.getElementsByClassName('svgBlock');
+
+
+        // Update loop
+        setInterval(function () {
+            [].forEach.call(svgBlocks, function (block) {
+                _updateSVGPos(block, Math.max(screenW, screenH) * 2);
+            });
+        }, 100);
+
+    }
+
+    /**
+     * Update SVG on window resize
+     */
+    function handleResize() {
+        var svg = document.getElementById(svgId);
+
+        var screenWOld = screenW;
+        var screenHOld = screenH;
+
+        screenW = _getBrowserDimensions().w;
+        screenH = _getBrowserDimensions().h;
+
+        svg.setAttribute('width', screenW + 'px');
+        svg.setAttribute('height', screenH + 'px');
+
+        var svgBlocks = document.getElementsByClassName('svgBlock');
+
+        [].forEach.call(svgBlocks, function (block) {
+            var x0 = parseFloat(block.getAttribute('x0'));
+            var y0 = parseFloat(block.getAttribute('y0'));
+            block.setAttribute('x0', x0 + (screenW - screenWOld) / 2 + 'px');
+            block.setAttribute('y0', y0 + (screenH - screenHOld) / 2 + 'px');
+        });
+
+    }
+
+    /**
+     * Update global mouse position on mouse move
+     * @param event
+     */
+    function handleMouseMove(event) {
         var eventDoc, doc, body;
 
         event = event || window.event; // IE-ism
@@ -37,80 +105,57 @@
         }
 
         // Use event.pageX / event.pageY here
-        x = event.pageX;
-        y = event.pageY;
+        mouseX = event.pageX;
+        mouseY = event.pageY;
 
     }
 
-    function getMouseX()
+
+    function _getMouseX()
     {
-        return x;
+        return mouseX;
     }
 
-    function getMouseY()
+    function _getMouseY()
     {
-        return y;
+        return mouseY;
     }
 
-    function getElemPos(elem)
-    {
-        // yay readability
-        for (var lx = 0, ly = 0;
-             elem != null;
-             lx += elem.offsetLeft, ly += elem.offsetTop, elem = elem.offsetParent);
-        // lx = elem.offsetLeft;
-        // ly = elem.offsetTop;
-        return {x: lx, y: ly};
-    }
 
-    function updateElemPos(elem, M, d)
-    {
-        var x0 = getElemPos(elem).x;
-        var y0 = getElemPos(elem).y;
-        // console.log(x0, y0);
-        var x00 = x0;
-        var y00 = y0;
-        if (elem.style.left !== '') {
-            x00 = x0 - parseInt(elem.style.left);
-        }
-        if (elem.style.top !== '') {
-            y00 = y0 - parseInt(elem.style.top);
-        }
-
-        var x = getMouseX();
-        var y = getMouseY();
-
-        var a = x - x0;
-        var b = y - y0;
-
-        var r = (a * a + b * b);
-
-        elem.style.left = ((x0 - a * M / r) + (x00 - x0) * d) + 'px';
-        elem.style.top = ((y0 - b * M / r) + (y00 - y0) * d) + 'px';
-    }
-
-    function updateSVGPos(svg, M, d)
+    /**
+     * Calculate new SVG position based on current attributes
+     * @param svgObj object to update
+     * @param M constant, determines range of avoidance
+     * @param d constant, determines midpoint of current current and new position
+     * @private
+     */
+    function _updateSVGPos(svgObj, M, d)
     {
         var ratio = d || 0.5;
-        var x = parseInt(svg.getAttribute('x'));
-        var y = parseInt(svg.getAttribute('y'));
-        var x0 = parseInt(svg.getAttribute('x0'));
-        var y0 = parseInt(svg.getAttribute('y0'));
+        var x = parseInt(svgObj.getAttribute('x'));
+        var y = parseInt(svgObj.getAttribute('y'));
+        var x0 = parseInt(svgObj.getAttribute('x0'));
+        var y0 = parseInt(svgObj.getAttribute('y0'));
 
 
-        var mouseX = getMouseX();
-        var mouseY = getMouseY();
+        var mouseX = _getMouseX();
+        var mouseY = _getMouseY();
 
-        var a = mouseX - x;
-        var b = mouseY - y;
+        var xdiff = mouseX - x;
+        var ydiff = mouseY - y;
 
-        var r = (a * a + b * b);
+        var hSquared = (xdiff * xdiff + ydiff * ydiff);
 
-        svg.setAttribute('x', ((x - a * M / r) + (x0 - x) * ratio) + 'px');
-        svg.setAttribute('y', ((y - b * M / r) + (y0 - y) * ratio) + 'px');
+        svgObj.setAttribute('x', ((x - xdiff * M / hSquared) + (x0 - x) * ratio) + 'px');
+        svgObj.setAttribute('y', ((y - ydiff * M / hSquared) + (y0 - y) * ratio) + 'px');
     }
 
-    function getBrowserDimensions()
+    /**
+     * Get dimensions of browser window
+     * @returns {{w: (number|Number), h: (number|Number)}}
+     * @private
+     */
+    function _getBrowserDimensions()
     {
         var w = document.documentElement.clientWidth
             || window.innerWidth
@@ -124,7 +169,18 @@
         return {w: w, h: h};
     }
 
-    function buildSVG(svgId, xStart, yStart, rLen, rows, cols, color)
+    /**
+     * Build a rectangle composed of SVG objects with class 'svgBlock'
+     * @param svgId parent SVG object ID
+     * @param xStart rectangle left start
+     * @param yStart rectangle top left start
+     * @param rLen SVG square size
+     * @param rows number of rows
+     * @param cols number of columns
+     * @param color color of each SVG object
+     * @private
+     */
+    function _buildSVG(svgId, xStart, yStart, rLen, rows, cols, color)
     {
         var svg = document.getElementById(svgId);
 
@@ -136,7 +192,7 @@
         for (var i = 0; i < cols; i++) {
             left = xStart;
             for (var j = 0; j < rows; j++) {
-                svg.appendChild(createSquare(left, top, rLen, color, 'svgBlock'));
+                svg.appendChild(_createSquare(left, top, rLen, color, 'svgBlock'));
                 left += rLen;
                 counter++;
             }
@@ -144,22 +200,20 @@
         }
     }
 
-    function buildTable(tableId, w, h)
-    {
-        var table = document.getElementById(tableId);
 
-        var tmpTr;
-
-        for (var i = 0; i < h; i++) {
-            tmpTr = document.createElement('tr');
-            for (var j = 0; j < w; j++) {
-                tmpTr.appendChild(createBlockTd());
-            }
-            table.appendChild(tmpTr);
-        }
-    }
-
-    function createRect(x, y, w, h, c, className, idName)
+    /**
+     * Create a SVG rectangle
+     * @param x left position
+     * @param y top position
+     * @param w width
+     * @param h height
+     * @param c color
+     * @param className class attribute name
+     * @param idName id attribute name
+     * @returns {Element}
+     * @private
+     */
+    function _createRect(x, y, w, h, c, className, idName)
     {
         var _x = x || '0px';
         var _y = y || '0px';
@@ -184,80 +238,21 @@
         return rect;
     }
 
-    function createSquare(x, y, l, c, className, idName)
+    /**
+     * Easy way to create a square SVG object
+     * @param x left position
+     * @param y top position
+     * @param l length of side of square
+     * @param c color
+     * @param className class attribute name
+     * @param idName id attribute name
+     * @returns {Element}
+     * @private
+     */
+    function _createSquare(x, y, l, c, className, idName)
     {
-        return createRect(x, y, l, l, c, className, idName);
+        return _createRect(x, y, l, l, c, className, idName);
     }
 
-    function createBlockTd()
-    {
-        var div = document.createElement('div');
 
-        div.setAttribute('class', 'block');
-        var td = document.createElement('td');
-        td.appendChild(div);
-        td.setAttribute('class', 'td');
-
-        return td;
-    }
-
-    function handleResize()
-    {
-        var svg = document.getElementById(svgId);
-
-        var screenWOld = screenW;
-        var screenHOld = screenH;
-
-        screenW = getBrowserDimensions().w;
-        screenH = getBrowserDimensions().h;
-
-        svg.setAttribute('width', screenW + 'px');
-        svg.setAttribute('height', screenH + 'px');
-
-        var svgBlocks = document.getElementsByClassName('svgBlock');
-
-        [].forEach.call(svgBlocks, function (block)
-        {
-            var x0 = parseFloat(block.getAttribute('x0'));
-            var y0 = parseFloat(block.getAttribute('y0'));
-            block.setAttribute('x0', x0 + (screenW - screenWOld) / 2 + 'px');
-            block.setAttribute('y0', y0 + (screenH - screenHOld) / 2 + 'px');
-        });
-
-    }
-
-    function main()
-    {
-        svgId = 'svg';
-
-        var svgObj = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svgObj.setAttribute('id', svgId);
-        document.body.appendChild(svgObj);
-
-
-        screenW = getBrowserDimensions().w;
-        screenH = getBrowserDimensions().h;
-
-        var titleText = document.getElementById('titleText');
-
-        svgObj.setAttribute('width', screenW + 'px');
-        svgObj.setAttribute('height', screenH + 'px');
-
-        var sw = 10;
-        var sr = Math.ceil(titleText.offsetWidth / sw) + 2;
-        var sc = Math.ceil(titleText.offsetHeight / sw) + 2;
-
-        buildSVG(svgId, (screenW - sw * sr) / 2, (screenH - sw * sc) / 2, sw, sr, sc, '#375a7f');
-
-        var svgBlocks = document.getElementsByClassName('svgBlock');
-
-        setInterval(function ()
-        {
-            [].forEach.call(svgBlocks, function (block)
-            {
-                updateSVGPos(block, 10000);
-            });
-        }, 64);
-
-    }
 })();
